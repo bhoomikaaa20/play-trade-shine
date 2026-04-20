@@ -14,16 +14,196 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_settings: {
+        Row: {
+          default_starting_balance: number
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          default_starting_balance?: number
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          default_starting_balance?: number
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      assets: {
+        Row: {
+          created_at: string
+          current_price: number
+          id: string
+          name: string
+          previous_close: number
+          sector: string | null
+          symbol: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_price: number
+          id?: string
+          name: string
+          previous_close?: number
+          sector?: string | null
+          symbol: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_price?: number
+          id?: string
+          name?: string
+          previous_close?: number
+          sector?: string | null
+          symbol?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      holdings: {
+        Row: {
+          asset_id: string
+          avg_cost: number
+          id: string
+          quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          asset_id: string
+          avg_cost?: number
+          id?: string
+          quantity?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          asset_id?: string
+          avg_cost?: number
+          id?: string
+          quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holdings_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          cash_balance: number
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          cash_balance?: number
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          cash_balance?: number
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          asset_id: string
+          created_at: string
+          id: string
+          price: number
+          quantity: number
+          side: string
+          symbol: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          id?: string
+          price: number
+          quantity: number
+          side: string
+          symbol: string
+          total: number
+          user_id: string
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          id?: string
+          price?: number
+          quantity?: number
+          side?: string
+          symbol?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +330,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
