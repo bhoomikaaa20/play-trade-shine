@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
+import axios from "axios";
 
-export type TradeAsset = { id: string; symbol: string; name: string; current_price: number };
+const API = "http://localhost:5000/api";
+export type TradeAsset = { _id: string; symbol: string; name: string; current_price: number };
 
 export default function TradeDialog({
   asset, side, open, onOpenChange, onDone,
@@ -39,7 +41,7 @@ export default function TradeDialog({
       const url = isBuy ? "/trade/buy" : "/trade/sell";
 
       const res = await axios.post(`${API}${url}`, {
-        asset_id: asset.id,
+        asset_id: asset._id,
         quantity
       }, {
         headers: {

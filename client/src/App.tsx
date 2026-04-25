@@ -10,6 +10,7 @@ import AuthPage from "./pages/Auth.tsx";
 import Portfolio from "./pages/Portfolio.tsx";
 import Transactions from "./pages/Transactions.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<RequireAuth><Index /></RequireAuth>} />
             <Route path="/portfolio" element={<RequireAuth><Portfolio /></RequireAuth>} />
             <Route path="/transactions" element={<RequireAuth><Transactions /></RequireAuth>} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

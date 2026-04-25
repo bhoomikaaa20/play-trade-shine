@@ -32,8 +32,14 @@ export default function AuthPage() {
 
       localStorage.setItem("token", res.data.token);
 
-      toast.success("Login successful");
-      nav("/", { replace: true });
+      const user = res.data.user;
+
+      if (user.role === "admin") {
+        nav("/admin", { replace: true });   // ✅ ADMIN REDIRECT
+      } else {
+        nav("/", { replace: true });        // ✅ USER REDIRECT
+      }
+
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Login failed");
     }
@@ -52,10 +58,11 @@ export default function AuthPage() {
         password
       });
 
-      localStorage.setItem("token", res.data.token);
-
-      toast.success("Account created");
-      nav("/", { replace: true });
+      if (res.data.user.role === "admin") {
+        nav("/admin");
+      } else {
+        nav("/");
+      }
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Signup failed");
     }
