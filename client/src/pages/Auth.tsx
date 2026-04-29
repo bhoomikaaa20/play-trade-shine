@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function AuthPage() {
   const nav = useNavigate();
-  const { user } = useAuth();
+  const { user, setAuthData } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -30,15 +30,8 @@ export default function AuthPage() {
         password
       });
 
-      localStorage.setItem("token", res.data.token);
-
-      const user = res.data.user;
-
-      if (user.role === "admin") {
-        nav("/admin", { replace: true });   // ✅ ADMIN REDIRECT
-      } else {
-        nav("/", { replace: true });        // ✅ USER REDIRECT
-      }
+      setAuthData(res.data.user, res.data.token);
+      nav("/", { replace: true });
 
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Login failed");
@@ -58,11 +51,8 @@ export default function AuthPage() {
         password
       });
 
-      if (res.data.user.role === "admin") {
-        nav("/admin");
-      } else {
-        nav("/");
-      }
+      setAuthData(res.data.user, res.data.token);
+      nav("/", { replace: true });
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Signup failed");
     }

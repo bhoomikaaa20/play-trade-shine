@@ -13,7 +13,12 @@ type Row = {
   asset_id: string;
   quantity: number;
   avg_cost: number;
-  assets: { id: string; symbol: string; name: string; current_price: number };
+  assets: {
+    _id: string;   // ✅ IMPORTANT
+    symbol: string;
+    name: string;
+    current_price: number;
+  };
 };
 
 export default function Portfolio() {
@@ -42,7 +47,9 @@ export default function Portfolio() {
     }
   };
 
-  useEffect(() => { load(); }, [user]);
+  useEffect(() => {
+    load();
+  }, [user]);
 
   const positions = (rows ?? []).map((r) => {
     const qty = Number(r.quantity);
@@ -52,6 +59,7 @@ export default function Portfolio() {
     const cost = qty * avg;
     const pl = value - cost;
     const plPct = cost > 0 ? (pl / cost) * 100 : 0;
+
     return { ...r, qty, price, avg, value, cost, pl, plPct };
   });
 
@@ -66,16 +74,25 @@ export default function Portfolio() {
       <div className="px-4 py-4 space-y-4">
         <div>
           <h1 className="font-mono text-sm uppercase tracking-widest text-primary">PORTFOLIO</h1>
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Holdings · P&amp;L · account equity</p>
+          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            Holdings · P&L · account equity
+          </p>
         </div>
 
+        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           <Stat label="Account" value={fmtMoney(account)} />
           <Stat label="Cash" value={fmtMoney(cash)} />
           <Stat label="Market Value" value={fmtMoney(equity)} />
-          <Stat label="Unrealized P&L" value={fmtMoney(totalPL)} sub={fmtPct(totalPLPct)} signed={totalPL} />
+          <Stat
+            label="Unrealized P&L"
+            value={fmtMoney(totalPL)}
+            sub={fmtPct(totalPLPct)}
+            signed={totalPL}
+          />
         </div>
 
+        {/* Table */}
         <div className="border border-border bg-surface overflow-x-auto">
           <table className="w-full font-mono text-xs">
             <thead className="bg-surface-2 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -85,20 +102,30 @@ export default function Portfolio() {
                 <th className="text-right px-3 py-2 hidden sm:table-cell">Avg</th>
                 <th className="text-right px-3 py-2">Last</th>
                 <th className="text-right px-3 py-2">Value</th>
-                <th className="text-right px-3 py-2">P&amp;L</th>
-                <th className="text-right px-3 py-2 hidden sm:table-cell">P&amp;L %</th>
+                <th className="text-right px-3 py-2">P&L</th>
+                <th className="text-right px-3 py-2 hidden sm:table-cell">P&L %</th>
                 <th className="text-right px-3 py-2">Action</th>
               </tr>
             </thead>
+
             <tbody>
-              {!rows && Array.from({ length: 4 }).map((_, i) => (
-                <tr key={i}><td colSpan={8} className="px-3 py-2"><Skeleton className="h-4 w-full bg-surface-3" /></td></tr>
-              ))}
+              {!rows &&
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan={8} className="px-3 py-2">
+                      <Skeleton className="h-4 w-full bg-surface-3" />
+                    </td>
+                  </tr>
+                ))}
+
               {rows && positions.length === 0 && (
-                <tr><td colSpan={8} className="px-3 py-8 text-center text-muted-foreground font-mono text-xs">
-                  // no positions · go to MARKETS to open a trade
-                </td></tr>
+                <tr>
+                  <td colSpan={8} className="px-3 py-8 text-center text-muted-foreground font-mono text-xs">
+                    // no positions · go to MARKETS to open a trade
+                  </td>
+                </tr>
               )}
+
               {positions.map((p) => (
                 <tr key={p.asset_id} className="border-b border-border/60 hover:bg-surface-2">
                   <td className="px-3 py-2 font-semibold text-primary">{p.assets.symbol}</td>
@@ -106,14 +133,51 @@ export default function Portfolio() {
                   <td className="px-3 py-2 text-right num hidden sm:table-cell">{fmtMoney(p.avg)}</td>
                   <td className="px-3 py-2 text-right num">{fmtMoney(p.price)}</td>
                   <td className="px-3 py-2 text-right num">{fmtMoney(p.value)}</td>
-                  <td className={`px-3 py-2 text-right num ${signClass(p.pl)}`}>{fmtMoney(p.pl)}</td>
-                  <td className={`px-3 py-2 text-right num hidden sm:table-cell ${signClass(p.plPct)}`}>{fmtPct(p.plPct)}</td>
+                  <td className={`px-3 py-2 text-right num ${signClass(p.pl)}`}>
+                    {fmtMoney(p.pl)}
+                  </td>
+                  <td className={`px-3 py-2 text-right num hidden sm:table-cell ${signClass(p.plPct)}`}>
+                    {fmtPct(p.plPct)}
+                  </td>
+
+                  {/* ✅ FIXED ACTION BUTTONS */}
                   <td className="px-3 py-2 text-right">
                     <div className="inline-flex gap-1">
-                      <Button size="sm" onClick={() => setActive({ asset: p.assets, side: "buy" })}
-                        className="h-6 px-2 text-[10px] font-mono uppercase bg-gain text-gain-foreground hover:bg-gain/90 rounded-none">+</Button>
-                      <Button size="sm" onClick={() => setActive({ asset: p.assets, side: "sell" })}
-                        className="h-6 px-2 text-[10px] font-mono uppercase bg-loss text-loss-foreground hover:bg-loss/90 rounded-none">−</Button>
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          setActive({
+                            asset: {
+                              _id: p.assets._id,
+                              symbol: p.assets.symbol,
+                              name: p.assets.name,
+                              current_price: p.assets.current_price
+                            },
+                            side: "buy"
+                          })
+                        }
+                        className="h-6 px-2 text-[10px] font-mono uppercase bg-gain text-gain-foreground hover:bg-gain/90 rounded-none"
+                      >
+                        +
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          setActive({
+                            asset: {
+                              _id: p.assets._id,
+                              symbol: p.assets.symbol,
+                              name: p.assets.name,
+                              current_price: p.assets.current_price
+                            },
+                            side: "sell"
+                          })
+                        }
+                        className="h-6 px-2 text-[10px] font-mono uppercase bg-loss text-loss-foreground hover:bg-loss/90 rounded-none"
+                      >
+                        −
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -123,6 +187,7 @@ export default function Portfolio() {
         </div>
       </div>
 
+      {/* Trade Dialog */}
       <TradeDialog
         asset={active?.asset ?? null}
         side={active?.side ?? "buy"}
@@ -134,11 +199,24 @@ export default function Portfolio() {
   );
 }
 
-function Stat({ label, value, sub, signed }: { label: string; value: string; sub?: string; signed?: number }) {
+function Stat({
+  label,
+  value,
+  sub,
+  signed
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  signed?: number;
+}) {
   const cls = signed === undefined ? "text-foreground" : signClass(signed);
+
   return (
     <div className="border border-border bg-surface p-3">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        {label}
+      </div>
       <div className={`font-mono num text-lg mt-1 ${cls}`}>{value}</div>
       {sub && <div className={`font-mono num text-[11px] mt-0.5 ${cls}`}>{sub}</div>}
     </div>

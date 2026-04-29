@@ -9,7 +9,6 @@ export const getPortfolio = async (req: AuthRequest, res: Response) => {
         const userId = req.user.id;
 
         const holdings = await Holding.find({ userId });
-
         const assets = await Asset.find();
 
         const assetMap: any = {};
@@ -19,19 +18,20 @@ export const getPortfolio = async (req: AuthRequest, res: Response) => {
 
         const rows = holdings.map(h => {
             const asset = assetMap[h.assetId.toString()];
+            if (!asset) return null;
 
             return {
                 asset_id: asset._id,
                 quantity: h.quantity,
-                avg_cost: asset.current_price, // simple assumption
+                avg_cost: asset.current_price,
                 assets: {
-                    id: asset._id,
+                    _id: asset._id,
                     symbol: asset.symbol,
                     name: asset.name,
                     current_price: asset.current_price
                 }
             };
-        });
+        }).filter(Boolean);
 
         const user = await User.findById(userId);
 

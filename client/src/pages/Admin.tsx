@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 const API = "http://localhost:5000/api";
 
 export default function Admin() {
-    const { user } = useAuth();
+    const { user, isAdmin, loading } = useAuth();
     const [assets, setAssets] = useState<any[]>([]);
     const [form, setForm] = useState({
         symbol: "",
@@ -64,8 +64,16 @@ export default function Admin() {
         load();
     };
 
-    if (user?.role !== "admin") {
-        return <div className="p-4">Access denied</div>;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">// loading session…</span>
+            </div>
+        );
+    }
+
+    if (!isAdmin) {
+        return <div className="p-4 text-destructive font-mono uppercase">Access denied</div>;
     }
 
     return (

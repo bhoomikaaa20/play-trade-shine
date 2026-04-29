@@ -8,7 +8,7 @@ import axios from "axios";
 
 const API = "http://localhost:5000/api";
 export default function TerminalShell({ children }: { children: ReactNode }) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const nav = useNavigate();
   const [cash, setCash] = useState<number | null>(null);
   const [now, setNow] = useState(new Date());
@@ -85,6 +85,7 @@ export default function TerminalShell({ children }: { children: ReactNode }) {
           <NavLink to="/" end className={navCls}>Markets</NavLink>
           <NavLink to="/portfolio" className={navCls}>Portfolio</NavLink>
           <NavLink to="/transactions" className={navCls}>Ledger</NavLink>
+          {isAdmin && <NavLink to="/admin" className={navCls}>Admin</NavLink>}
         </nav>
       </header>
 
